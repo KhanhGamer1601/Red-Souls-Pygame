@@ -26,10 +26,9 @@ while running:
             running = False
         if i.type == MOUSEBUTTONDOWN:
             if i.button == 1:
-                fireball_right = Ability('game_img/fireball.png', Red_Souls.rect.x, Red_Souls.rect.y)
-                fireball_left = Ability('game_img/fireball.png', Red_Souls.rect.x, Red_Souls.rect.y)
-                fireball_group_right.add(fireball_right)
-                fireball_group_left.add(fireball_left)
+                fireball = Ability('game_img/fireball.png', Red_Souls.rect.x, Red_Souls.rect.y)
+                fireball_group_right.add(fireball)
+                fireball_group_left.add(fireball)
                 if Red_Souls.player != Red_Souls.turn_left:
                     shoot_state = 'shooting_right'
                 if Red_Souls.player == Red_Souls.turn_left:
