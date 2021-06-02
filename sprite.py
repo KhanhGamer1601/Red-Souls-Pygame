@@ -52,7 +52,7 @@ class Ability(sprite.Sprite):
         self.rect.y = y
 
     def shoot_right(self):
-        self.rect.x += 1
+        self.rect.x += 16
 
     def shoot_left(self):
-        self.rect.x -= 1
+        self.rect.x -= 16
