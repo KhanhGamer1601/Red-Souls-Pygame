@@ -16,6 +16,10 @@ Red_Souls = Player('game_img/player.png', 300, 100, 'game_img/player_turn_left.p
 fireball_group_right = sprite.Group()
 fireball_group_left = sprite.Group()
 
+Goblin_Guard = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Enemy_Group = sprite.Group()
+Enemy_Group.add(Goblin_Guard)
+
 running = True
 while running:
     App.fill(BLACK)
@@ -40,17 +44,18 @@ while running:
         for i in fireball_group_right:
             i.shoot_right()
             App.blit(i.ability, i.rect)
-            if i.rect.x == 1016:
+            if i.rect.x >= 1016:
                 i.kill()
 
     if shoot_state == 'shooting_left':
         for i in fireball_group_left:
             i.shoot_left()
             App.blit(i.ability, i.rect)
-            if i.rect.x == 0:
+            if i.rect.x <= 0:
                 i.kill()
 
     App.blit(Red_Souls.player, Red_Souls.rect)
+    App.blit(Goblin_Guard.enemy, Goblin_Guard.rect)
 
     display.update()
 

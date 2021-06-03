@@ -1,5 +1,6 @@
 from pygame import sprite, image, key
 from pygame.constants import K_a, K_d, K_s, K_w
+from random import randint
 
 class Player(sprite.Sprite):
     def __init__(self, img_right, x, y, img_left):
@@ -56,3 +57,13 @@ class Ability(sprite.Sprite):
 
     def shoot_left(self):
         self.rect.x -= 16
+
+class Enemy(sprite.Sprite):
+    def __init__(self, img_right, img_left):
+        super().__init__()
+        self.enemy = image.load(img_right)
+        self.rect = self.enemy.get_rect()
+        self.rect.x = randint(0, 900)
+        self.rect.y = randint(0, 500)
+        self.turn_left = image.load(img_left)
+        self.img = img_right
