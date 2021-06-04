@@ -1,4 +1,4 @@
-from pygame import display, init, event, quit, image, draw, time
+from pygame import display, init, event, quit, image, draw, time, font
 from pygame.constants import MOUSEBUTTONDOWN, QUIT
 from sprite import*
 
@@ -20,10 +20,15 @@ Goblin_Guard = Enemy('game_img/enemy.png', 'game_img/enemy.png')
 Enemy_Group = sprite.Group()
 Enemy_Group.add(Goblin_Guard)
 
+Game_Font = font.SysFont('Times', 16)
+Score = 0
+Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
+
 running = True
 while running:
     App.fill(BLACK)
     Red_Souls.move()
+    App.blit(Score_Board, [450, 30])
 
     for i in event.get():
         if i.type == QUIT:
@@ -46,6 +51,9 @@ while running:
             App.blit(i.ability, i.rect)
             if i.rect.x >= 1016:
                 i.kill()
+            if sprite.spritecollide(i, Enemy_Group, True):
+                Score += 1
+                Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
 
     if shoot_state == 'shooting_left':
         for i in fireball_group_left:
@@ -53,6 +61,9 @@ while running:
             App.blit(i.ability, i.rect)
             if i.rect.x <= 0:
                 i.kill()
+            if sprite.spritecollide(i, Enemy_Group, True):
+                Score += 1
+                Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
 
     App.blit(Red_Souls.player, Red_Souls.rect)
     App.blit(Goblin_Guard.enemy, Goblin_Guard.rect)
