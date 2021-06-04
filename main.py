@@ -51,9 +51,10 @@ while running:
             App.blit(i.ability, i.rect)
             if i.rect.x >= 1016:
                 i.kill()
-            if sprite.spritecollide(i, Enemy_Group, True):
+            if sprite.spritecollide(i, Enemy_Group, False):
                 Score += 1
                 Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
+                i.kill()
 
     if shoot_state == 'shooting_left':
         for i in fireball_group_left:
@@ -61,9 +62,10 @@ while running:
             App.blit(i.ability, i.rect)
             if i.rect.x <= 0:
                 i.kill()
-            if sprite.spritecollide(i, Enemy_Group, True):
+            if sprite.spritecollide(i, Enemy_Group, False):
                 Score += 1
                 Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
+                i.kill()
 
     App.blit(Red_Souls.player, Red_Souls.rect)
     App.blit(Goblin_Guard.enemy, Goblin_Guard.rect)
