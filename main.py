@@ -16,9 +16,10 @@ Red_Souls = Player('game_img/player.png', 300, 100, 'game_img/player_turn_left.p
 fireball_group_right = sprite.Group()
 fireball_group_left = sprite.Group()
 
-Goblin_Guard = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Goblin_Guard_0 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+
 Enemy_Group = sprite.Group()
-Enemy_Group.add(Goblin_Guard)
+Enemy_Group.add(Goblin_Guard_0)
 
 Game_Font = font.SysFont('Times', 16)
 Score = 0
@@ -68,7 +69,7 @@ while running:
                 i.kill()
 
     App.blit(Red_Souls.player, Red_Souls.rect)
-    App.blit(Goblin_Guard.enemy, Goblin_Guard.rect)
+    App.blit(Goblin_Guard_0.enemy, Goblin_Guard_0.rect)
 
     display.update()
 
