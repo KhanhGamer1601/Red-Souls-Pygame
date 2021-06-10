@@ -23,7 +23,25 @@ Score = 0
 Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
 
 Goblin_Guard_0 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Goblin_Guard_1 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Goblin_Guard_2 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Goblin_Guard_3 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Goblin_Guard_4 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Goblin_Guard_5 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Goblin_Guard_6 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Goblin_Guard_7 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Goblin_Guard_8 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Goblin_Guard_9 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
 Enemy_Group.add(Goblin_Guard_0)
+Enemy_Group.add(Goblin_Guard_1)
+Enemy_Group.add(Goblin_Guard_2)
+Enemy_Group.add(Goblin_Guard_3)
+Enemy_Group.add(Goblin_Guard_4)
+Enemy_Group.add(Goblin_Guard_5)
+Enemy_Group.add(Goblin_Guard_6)
+Enemy_Group.add(Goblin_Guard_7)
+Enemy_Group.add(Goblin_Guard_8)
+Enemy_Group.add(Goblin_Guard_9)
 
 running = True
 while running:
@@ -71,6 +89,7 @@ while running:
     App.blit(Red_Souls.player, Red_Souls.rect)
 
     for i in Enemy_Group:
+        i.animation()
         App.blit(i.enemy, i.rect)
 
     display.update()

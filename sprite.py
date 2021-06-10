@@ -63,7 +63,22 @@ class Enemy(sprite.Sprite):
         super().__init__()
         self.enemy = image.load(img_right)
         self.rect = self.enemy.get_rect()
-        self.rect.x = randint(0, 900)
-        self.rect.y = randint(0, 500)
+        self.rect.x = randint(50, 850)
+        self.rect.y = randint(50, 450)
         self.turn_left = image.load(img_left)
         self.img = img_right
+        self.run_state = 'ready'
+
+    def animation(self):
+        if self.run_state != 'running_left':
+            self.run_state = 'running_right'
+        
+        if self.run_state == 'running_right':
+            self.rect.x += 1
+            if self.rect.x >= 850:
+                self.run_state = 'running_left'
+
+        if self.run_state == 'running_left':
+            self.rect.x -= 1
+            if self.rect.x <= 50:
+                self.run_state = 'running_right'
