@@ -1,4 +1,4 @@
-from pygame import display, init, event, quit, image, draw, time, font
+from pygame import display, init, event, quit, image, draw, font
 from pygame.constants import MOUSEBUTTONDOWN, QUIT
 from sprite import*
 
@@ -21,6 +21,9 @@ Enemy_Group = sprite.Group()
 Game_Font = font.SysFont('Times', 16)
 Score = 0
 Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
+
+Health_Text = Game_Font.render('Player Health: {}'.format(Red_Souls.health), True, RED)
+Heart = image.load('game_img/heart.png')
 
 Goblin_Guard_0 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
 Goblin_Guard_1 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
@@ -47,7 +50,9 @@ running = True
 while running:
     App.fill(BLACK)
     Red_Souls.move()
-    App.blit(Score_Board, [450, 30])
+    App.blit(Score_Board, [250, 30])
+    App.blit(Health_Text, [450, 30])
+    App.blit(Heart, [560, 25])
 
     for i in event.get():
         if i.type == QUIT:
@@ -87,6 +92,15 @@ while running:
                 i.kill()
 
     App.blit(Red_Souls.player, Red_Souls.rect)
+
+    if sprite.spritecollide(Red_Souls, Enemy_Group, False):
+        Red_Souls.health -= 1
+        Health_Text = Game_Font.render('Player Health: {}'.format(Red_Souls.health), True, RED)
+        Red_Souls.rect.x = randint(50, 850)
+        Red_Souls.rect.x = randint(50, 450)
+
+        if Red_Souls.health <= 0:
+            print('Player died')
 
     for i in Enemy_Group:
         i.animation()

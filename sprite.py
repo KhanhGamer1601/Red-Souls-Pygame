@@ -12,6 +12,7 @@ class Player(sprite.Sprite):
         self.turn_left = image.load(img_left)
         self.img = img_right
         self.turn_state = 'ready'
+        self.health = 100
 
     def move(self):
         Key = key.get_pressed()
