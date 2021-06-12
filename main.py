@@ -102,7 +102,8 @@ while running:
         Red_Souls.rect.y = randint(50, 450)
 
         if Red_Souls.health <= 0:
-            Red_Souls.kill()
+            Red_Souls.rect.x = -160
+            Red_Souls.rect.y = -160
             for i in Enemy_Group:
                 i.kill()
             Death_Text = Game_Font.render('You Died', True, RED)
