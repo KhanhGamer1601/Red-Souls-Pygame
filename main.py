@@ -117,10 +117,10 @@ while running:
         App.blit(i.obstacle, i.rect)
 
         if i.rect.colliderect(Red_Souls.rect.x + Red_Souls.dx, Red_Souls.rect.y, 50, 50):
-            Red_Souls.dx = Red_Souls.rect.x
+            Red_Souls.dx = 0
 
         if i.rect.colliderect(Red_Souls.rect.x, Red_Souls.rect.y + Red_Souls.dy, 50, 50):
-            Red_Souls.dy = Red_Souls.rect.y
+            Red_Souls.dy = 0
 
     App.blit(Red_Souls.player, Red_Souls.rect)
 
