@@ -12,11 +12,12 @@ App = display.set_mode([1016, 600])
 display.set_caption('Red Souls !')
 shoot_state = 'ready'
 
-Red_Souls = Player('game_img/player.png', 300, 100, 'game_img/player_turn_left.png')
+Red_Souls = Player('game_img/player.png', 300, 100)
 fireball_group_right = sprite.Group()
 fireball_group_left = sprite.Group()
 
 Enemy_Group = sprite.Group()
+Obstacle_Group = sprite.Group()
 
 Game_Font = font.SysFont('Times', 16)
 Score = 0
@@ -25,16 +26,19 @@ Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
 Health_Text = Game_Font.render('Player Health: {}'.format(Red_Souls.health), True, RED)
 Heart = image.load('game_img/heart.png')
 
-Goblin_Guard_0 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
-Goblin_Guard_1 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
-Goblin_Guard_2 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
-Goblin_Guard_3 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
-Goblin_Guard_4 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
-Goblin_Guard_5 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
-Goblin_Guard_6 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
-Goblin_Guard_7 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
-Goblin_Guard_8 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
-Goblin_Guard_9 = Enemy('game_img/enemy.png', 'game_img/enemy.png')
+Stone = Obstacle('game_img/obstacle.png', 450, 250)
+Obstacle_Group.add(Stone)
+
+Goblin_Guard_0 = Enemy('game_img/enemy.png')
+Goblin_Guard_1 = Enemy('game_img/enemy.png')
+Goblin_Guard_2 = Enemy('game_img/enemy.png')
+Goblin_Guard_3 = Enemy('game_img/enemy.png')
+Goblin_Guard_4 = Enemy('game_img/enemy.png')
+Goblin_Guard_5 = Enemy('game_img/enemy.png')
+Goblin_Guard_6 = Enemy('game_img/enemy.png')
+Goblin_Guard_7 = Enemy('game_img/enemy.png')
+Goblin_Guard_8 = Enemy('game_img/enemy.png')
+Goblin_Guard_9 = Enemy('game_img/enemy.png')
 Enemy_Group.add(Goblin_Guard_0)
 Enemy_Group.add(Goblin_Guard_1)
 Enemy_Group.add(Goblin_Guard_2)
@@ -91,20 +95,33 @@ while running:
                 Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
                 i.kill()
 
-    App.blit(Red_Souls.player, Red_Souls.rect)
-
     if sprite.spritecollide(Red_Souls, Enemy_Group, False):
         Red_Souls.health -= 1
         Health_Text = Game_Font.render('Player Health: {}'.format(Red_Souls.health), True, RED)
         Red_Souls.rect.x = randint(50, 850)
-        Red_Souls.rect.x = randint(50, 450)
+        Red_Souls.rect.y = randint(50, 450)
 
         if Red_Souls.health <= 0:
-            print('Player died')
+            Red_Souls.kill()
+            for i in Enemy_Group:
+                i.kill()
+            Death_Text = Game_Font.render('You Died', True, RED)
+            App.blit(Death_Text, [450, 250])
 
     for i in Enemy_Group:
         i.animation()
         App.blit(i.enemy, i.rect)
+
+    for i in Obstacle_Group:
+        App.blit(i.obstacle, i.rect)
+
+        if i.rect.colliderect(Red_Souls.rect.x + Red_Souls.dx, Red_Souls.rect.y, 50, 50):
+            Red_Souls.dx = Red_Souls.rect.x
+
+        if i.rect.colliderect(Red_Souls.rect.x, Red_Souls.rect.y + Red_Souls.dy, 50, 50):
+            Red_Souls.dy = Red_Souls.rect.y
+
+    App.blit(Red_Souls.player, Red_Souls.rect)
 
     display.update()
 
