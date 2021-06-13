@@ -19,25 +19,25 @@ class Player(sprite.Sprite):
     def move(self):
         Key = key.get_pressed()
 
-        self.dx = 0
-        self.dy = 0
+        dx = 0
+        dy = 0
 
         if Key[K_w]:
-            self.dy -= 1
+            dy -= 1
 
         if Key[K_s]:
-            self.dy = 1
+            dy = 1
 
         if Key[K_a]:
-            self.dx -= 1
+            dx -= 1
             self.turn_state = 'turn_left'
 
         if Key[K_d]:
-            self.dx = 1
+            dx = 1
             self.turn_state = 'turn_right'
 
-        self.rect.x += self.dx
-        self.rect.y += self.dy
+        self.rect.x += dx
+        self.rect.y += dy
 
         if self.rect.y < 10:
             self.rect.y = 10
