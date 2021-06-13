@@ -15,6 +15,8 @@ class Player(sprite.Sprite):
         self.health = 10
         self.dx = 0
         self.dy = 0
+        self.obstacle_collision = False
+        self.condition = None
 
     def move(self):
         Key = key.get_pressed()
@@ -22,19 +24,67 @@ class Player(sprite.Sprite):
         dx = self.dx
         dy = self.dy
 
-        if Key[K_w]:
-            dy -= 1
+        if self.obstacle_collision == False:
+            if Key[K_w]:
+                dy -= 1
 
-        if Key[K_s]:
-            dy = 1
+            if Key[K_s]:
+                dy = 1
 
-        if Key[K_a]:
-            dx -= 1
-            self.turn_state = 'turn_left'
+            if Key[K_a]:
+                dx -= 1
+                self.turn_state = 'turn_left'
 
-        if Key[K_d]:
-            dx = 1
-            self.turn_state = 'turn_right'
+            if Key[K_d]:
+                dx = 1
+                self.turn_state = 'turn_right'
+
+        if self.obstacle_collision == True:
+            if self.condition == 1:
+                if Key[K_w]:
+                    dy -= 1
+
+                if Key[K_s]:
+                    dy = 1
+
+                if Key[K_a]:
+                    dx -= 1
+                    self.turn_state = 'turn_left'
+
+            if self.condition == 2:
+                if Key[K_w]:
+                    dy -= 1
+
+                if Key[K_s]:
+                    dy = 1
+
+                if Key[K_d]:
+                    dx = 1
+                    self.turn_state = 'turn_right'
+
+            if self.condition == 3:
+                if Key[K_w]:
+                    dy -= 1
+
+                if Key[K_a]:
+                    dx -= 1
+                    self.turn_state = 'turn_left'
+
+                if Key[K_d]:
+                    dx = 1
+                    self.turn_state = 'turn_right'
+
+            if self.condition == 4:
+                if Key[K_a]:
+                    dx -= 1
+                    self.turn_state = 'turn_left'
+
+                if Key[K_s]:
+                    dy = 1
+
+                if Key[K_d]:
+                    dx = 1
+                    self.turn_state = 'turn_right'
 
         self.rect.x += dx
         self.rect.y += dy
