@@ -19,8 +19,8 @@ class Player(sprite.Sprite):
     def move(self):
         Key = key.get_pressed()
 
-        dx = 0
-        dy = 0
+        dx = self.dx
+        dy = self.dy
 
         if Key[K_w]:
             dy -= 1
