@@ -1,4 +1,4 @@
-from pygame import display, init, event, quit, image, draw, font, key
+from pygame import display, init, event, quit, image, draw, font
 from pygame.constants import MOUSEBUTTONDOWN, QUIT
 from sprite import*
 
@@ -112,25 +112,15 @@ while running:
     for i in Obstacle_Group:
         if i.rect.colliderect(Red_Souls.rect.x + Red_Souls.dx, Red_Souls.rect.y, 50, 50):
             Red_Souls.obstacle_collision = True
-            Key = key.get_pressed()
 
-            for i in Obstacle_Group:
-                if Red_Souls.obstacle_collision:
-                    if i.rect.x >= Red_Souls.rect.x:
-                        Red_Souls.condition = 1
-                    if i.rect.x <= Red_Souls.rect.x:
-                        Red_Souls.condition = 2
+            if Red_Souls.obstacle_collision:
+                Red_Souls.dx = 0
 
         if i.rect.colliderect(Red_Souls.rect.x, Red_Souls.rect.y + Red_Souls.dy, 50, 50):
             Red_Souls.obstacle_collision = True
-            Key = key.get_pressed()
 
-            for i in Obstacle_Group:
-                if Red_Souls.obstacle_collision:
-                    if i.rect.y <= Red_Souls.rect.y:
-                        Red_Souls.condition = 3
-                    if i.rect.y >= Red_Souls.rect.y:
-                        Red_Souls.condition = 4
+            if Red_Souls.obstacle_collision:
+                Red_Souls.dy = 0
 
         App.blit(i.obstacle, i.rect)
 
