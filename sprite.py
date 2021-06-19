@@ -20,31 +20,27 @@ class Player(sprite.Sprite):
     def move(self):
         Key = key.get_pressed()
 
-        dx = self.dx
-        dy = self.dy
+        if Key[K_w]:
+            self.dy -= 1
 
-        if self.obstacle_collision == False:
-            if Key[K_w]:
-                dy -= 1
+        if Key[K_s]:
+            self.dy = 1
 
-            if Key[K_s]:
-                dy = 1
+        if Key[K_a]:
+            self.dx -= 1
+            self.turn_state = 'turn_left'
 
-            if Key[K_a]:
-                dx -= 1
-                self.turn_state = 'turn_left'
+        if Key[K_d]:
+            self.dx = 1
+            self.turn_state = 'turn_right'
 
-            if Key[K_d]:
-                dx = 1
-                self.turn_state = 'turn_right'
+    def collision(self):
+        self.rect.x += self.dx
+        self.rect.y += self.dy
 
-        if self.obstacle_collision == True:
-            dx = self.dx
-            dy = self.dy
-
-        self.rect.x += dx
-        self.rect.y += dy
-
+        self.dx = 0
+        self.dy = 0
+        
         if self.rect.y < 10:
             self.rect.y = 10
 
@@ -111,3 +107,10 @@ class Obstacle(sprite.Sprite):
         self.rect = self.obstacle.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+class World(sprite.Sprite):
+    def __init__(self, background):
+        self.background = transform.scale(image.load(background), (900, 500))
+        self.rect = self.background.get_rect()
+        self.rect.x = 50
+        self.rect.y = 50

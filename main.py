@@ -12,6 +12,8 @@ App = display.set_mode([1016, 600])
 display.set_caption('Red Souls !')
 shoot_state = 'ready'
 
+Map_1 = World('game_img/map_1.png')
+
 Red_Souls = Player('game_img/player.png', 300, 100)
 fireball_group_right = sprite.Group()
 fireball_group_left = sprite.Group()
@@ -26,8 +28,24 @@ Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
 Health_Text = Game_Font.render('Player Health: {}'.format(Red_Souls.health), True, RED)
 Heart = image.load('game_img/heart.png')
 
-Stone = Obstacle('game_img/obstacle.png', 450, 250)
-Obstacle_Group.add(Stone)
+Obstacle_list = []
+
+file = open('map.txt', 'r')
+value = file.read()
+file.close()
+
+wall = value.split()
+map_game = []
+
+for i in wall:
+    map_game.append(i.split(','))
+
+for i in range(len(map_game)):
+    for j in range(len(map_game[i])):
+        if map_game[i][j] == '1':
+            Stone = Obstacle('game_img/obstacle.png', j * 50, i * 50)
+            Obstacle_0 = (Stone.obstacle, Stone.rect)
+            Obstacle_list.append(Obstacle_0)
 
 Goblin_Guard_0 = Enemy('game_img/enemy.png')
 Goblin_Guard_1 = Enemy('game_img/enemy.png')
@@ -57,6 +75,7 @@ while running:
     App.blit(Score_Board, [250, 30])
     App.blit(Health_Text, [450, 30])
     App.blit(Heart, [560, 25])
+    App.blit(Map_1.background, Map_1.rect)
 
     for i in event.get():
         if i.type == QUIT:
@@ -70,8 +89,6 @@ while running:
                     shoot_state = 'shooting_right'
                 if Red_Souls.player == Red_Souls.turn_left:
                     shoot_state = 'shooting_left'
-
-    draw.rect(App, GRAY, [50, 50, 900, 500])
 
     if shoot_state == 'shooting_right':
         for i in fireball_group_right:
@@ -109,21 +126,15 @@ while running:
             Death_Text = Game_Font.render('You Died', True, RED)
             App.blit(Death_Text, [450, 250])
 
-    for i in Obstacle_Group:
-        if i.rect.colliderect(Red_Souls.rect.x + Red_Souls.dx, Red_Souls.rect.y, 50, 50):
-            Red_Souls.obstacle_collision = True
+    for i in Obstacle_list:
+        if i[1].colliderect(Red_Souls.rect.x + Red_Souls.dx, Red_Souls.rect.y, 50, 50):
+            Red_Souls.dx = 0
+        if i[1].colliderect(Red_Souls.rect.x, Red_Souls.rect.y + Red_Souls.dy, 50, 50):
+            Red_Souls.dy = 0
 
-            if Red_Souls.obstacle_collision:
-                Red_Souls.dx = 0
-
-        if i.rect.colliderect(Red_Souls.rect.x, Red_Souls.rect.y + Red_Souls.dy, 50, 50):
-            Red_Souls.obstacle_collision = True
-
-            if Red_Souls.obstacle_collision:
-                Red_Souls.dy = 0
-
-        App.blit(i.obstacle, i.rect)
-
+        Red_Souls.collision()
+        App.blit(i[0], i[1])
+        
     for i in Enemy_Group:
         i.animation()
         App.blit(i.enemy, i.rect)
