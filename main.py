@@ -12,14 +12,13 @@ App = display.set_mode([1016, 600])
 display.set_caption('Red Souls !')
 shoot_state = 'ready'
 
-Map_1 = World('game_img/map_1.png')
+Map = World('game_img/map.png')
 
 Red_Souls = Player('game_img/player.png', 300, 100)
 fireball_group_right = sprite.Group()
 fireball_group_left = sprite.Group()
 
 Enemy_Group = sprite.Group()
-Obstacle_Group = sprite.Group()
 
 Game_Font = font.SysFont('Times', 16)
 Score = 0
@@ -43,7 +42,7 @@ for i in wall:
 for i in range(len(map_game)):
     for j in range(len(map_game[i])):
         if map_game[i][j] == '1':
-            Stone = Obstacle('game_img/obstacle.png', j * 50, i * 50)
+            Stone = Obstacle('game_img/obstacle.png', 100 + (j * 50), 100 + (i * 50))
             Obstacle_0 = (Stone.obstacle, Stone.rect)
             Obstacle_list.append(Obstacle_0)
 
@@ -75,7 +74,7 @@ while running:
     App.blit(Score_Board, [250, 30])
     App.blit(Health_Text, [450, 30])
     App.blit(Heart, [560, 25])
-    App.blit(Map_1.background, Map_1.rect)
+    App.blit(Map.background, Map.rect)
 
     for i in event.get():
         if i.type == QUIT:
