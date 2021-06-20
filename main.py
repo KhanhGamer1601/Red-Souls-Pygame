@@ -14,7 +14,7 @@ shoot_state = 'ready'
 
 Map = World('game_img/map.png')
 
-Red_Souls = Player('game_img/player.png', 300, 100)
+Red_Souls = Player('game_img/player.png', 450, 250)
 fireball_group_right = sprite.Group()
 fireball_group_left = sprite.Group()
 
@@ -114,8 +114,8 @@ while running:
     if sprite.spritecollide(Red_Souls, Enemy_Group, False):
         Red_Souls.health -= 1
         Health_Text = Game_Font.render('Player Health: {}'.format(Red_Souls.health), True, RED)
-        Red_Souls.rect.x = randint(50, 850)
-        Red_Souls.rect.y = randint(50, 450)
+        Red_Souls.rect.x = 450
+        Red_Souls.rect.y = 250
 
         if Red_Souls.health <= 0:
             Red_Souls.rect.x = -160
@@ -131,6 +131,7 @@ while running:
         if i[1].colliderect(Red_Souls.rect.x, Red_Souls.rect.y + Red_Souls.dy, 50, 50):
             Red_Souls.dy = 0
 
+    for i in Obstacle_list:
         Red_Souls.collision()
         App.blit(i[0], i[1])
         
