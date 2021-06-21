@@ -1,4 +1,4 @@
-from pygame import display, init, event, quit, image, draw, font
+from pygame import display, init, event, quit, image, draw, font, mouse
 from pygame.constants import MOUSEBUTTONDOWN, QUIT
 from sprite import*
 
@@ -14,7 +14,7 @@ shoot_state = 'ready'
 
 Map = World('game_img/map.png')
 
-Red_Souls = Player('game_img/player.png', 450, 250)
+Red_Souls = Player('game_img/player.png', 50, 500)
 fireball_group_right = sprite.Group()
 fireball_group_left = sprite.Group()
 
@@ -46,16 +46,16 @@ for i in range(len(map_game)):
             Obstacle_0 = (Stone.obstacle, Stone.rect)
             Obstacle_list.append(Obstacle_0)
 
-Goblin_Guard_0 = Enemy('game_img/enemy.png')
-Goblin_Guard_1 = Enemy('game_img/enemy.png')
-Goblin_Guard_2 = Enemy('game_img/enemy.png')
-Goblin_Guard_3 = Enemy('game_img/enemy.png')
-Goblin_Guard_4 = Enemy('game_img/enemy.png')
-Goblin_Guard_5 = Enemy('game_img/enemy.png')
-Goblin_Guard_6 = Enemy('game_img/enemy.png')
-Goblin_Guard_7 = Enemy('game_img/enemy.png')
-Goblin_Guard_8 = Enemy('game_img/enemy.png')
-Goblin_Guard_9 = Enemy('game_img/enemy.png')
+Goblin_Guard_0 = Enemy('game_img/enemy.png', 201, 185)
+Goblin_Guard_1 = Enemy('game_img/enemy.png', 203, 50)
+Goblin_Guard_2 = Enemy('game_img/enemy.png', 379, 155)
+Goblin_Guard_3 = Enemy('game_img/enemy.png', 616, 162)
+Goblin_Guard_4 = Enemy('game_img/enemy.png', 650, 300)
+Goblin_Guard_5 = Enemy('game_img/enemy.png', 81, 430)
+Goblin_Guard_6 = Enemy('game_img/enemy.png', 76, 400)
+Goblin_Guard_7 = Enemy('game_img/enemy.png', 792, 256)
+Goblin_Guard_8 = Enemy('game_img/enemy.png', 600, 150)
+Goblin_Guard_9 = Enemy('game_img/enemy.png', 275, 250)
 Enemy_Group.add(Goblin_Guard_0)
 Enemy_Group.add(Goblin_Guard_1)
 Enemy_Group.add(Goblin_Guard_2)
@@ -114,8 +114,8 @@ while running:
     if sprite.spritecollide(Red_Souls, Enemy_Group, False):
         Red_Souls.health -= 1
         Health_Text = Game_Font.render('Player Health: {}'.format(Red_Souls.health), True, RED)
-        Red_Souls.rect.x = 450
-        Red_Souls.rect.y = 250
+        Red_Souls.rect.x = 50
+        Red_Souls.rect.y = 50
 
         if Red_Souls.health <= 0:
             Red_Souls.rect.x = -160
@@ -131,8 +131,18 @@ while running:
         if i[1].colliderect(Red_Souls.rect.x, Red_Souls.rect.y + Red_Souls.dy, 50, 50):
             Red_Souls.dy = 0
 
+        for e in Enemy_Group:
+            if i[1].colliderect(e.rect.x + e.dx, e.rect.y, 50, 50):
+                e.dx = 0
+            if i[1].colliderect(e.rect.x, e.rect.y + e.dy, 50, 50):
+                e.dy = 0
+
     for i in Obstacle_list:
         Red_Souls.collision()
+
+        for e in Enemy_Group:
+            e.collision()
+
         App.blit(i[0], i[1])
         
     for i in Enemy_Group:

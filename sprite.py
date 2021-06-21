@@ -74,15 +74,17 @@ class Ability(sprite.Sprite):
         self.rect.x -= 16
 
 class Enemy(sprite.Sprite):
-    def __init__(self, img):
+    def __init__(self, img, x, y):
         super().__init__()
         self.enemy = transform.scale(image.load(img), (50, 50))
         self.rect = self.enemy.get_rect()
-        self.rect.x = randint(50, 850)
-        self.rect.y = randint(50, 450)
+        self.rect.x = x
+        self.rect.y = y
         self.turn_left = transform.scale(transform.flip(image.load(img), True, False), (50, 50))
         self.img = img
         self.run_state = 'ready'
+        self.dx = 0
+        self.dy = 0
 
     def animation(self):
         if self.run_state != 'running_left':
@@ -90,15 +92,22 @@ class Enemy(sprite.Sprite):
         
         if self.run_state == 'running_right':
             self.enemy = transform.scale(image.load(self.img), (50, 50))
-            self.rect.x += 1
+            self.dx += 1
             if self.rect.x >= 850:
                 self.run_state = 'running_left'
 
         if self.run_state == 'running_left':
             self.enemy = self.turn_left
-            self.rect.x -= 1
+            self.dx -= 1
             if self.rect.x <= 50:
                 self.run_state = 'running_right'
+
+    def collision(self):
+        self.rect.x += self.dx
+        self.rect.y += self.dy
+
+        self.dx = 0
+        self.dy = 0
 
 class Obstacle(sprite.Sprite):
     def __init__(self, img, x, y):
