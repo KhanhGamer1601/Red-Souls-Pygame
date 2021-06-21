@@ -1,4 +1,4 @@
-from pygame import display, init, event, quit, image, draw, font, mouse
+from pygame import display, init, event, quit, image, draw, font
 from pygame.constants import MOUSEBUTTONDOWN, QUIT
 from sprite import*
 
@@ -134,8 +134,14 @@ while running:
         for e in Enemy_Group:
             if i[1].colliderect(e.rect.x + e.dx, e.rect.y, 50, 50):
                 e.dx = 0
+                e.run_state = 'running_left'
+                if e.rect.x <= 150:
+                    e.run_state = 'running_right'
             if i[1].colliderect(e.rect.x, e.rect.y + e.dy, 50, 50):
                 e.dy = 0
+                e.run_state = 'running_left'
+                if e.rect.x <= 150:
+                    e.run_state = 'running_right'
 
         for b_1 in fireball_group_right:
             if i[1].colliderect(b_1.rect.x + b_1.dx, b_1.rect.y, 50, 50):
