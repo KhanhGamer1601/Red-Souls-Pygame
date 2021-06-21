@@ -137,11 +137,33 @@ while running:
             if i[1].colliderect(e.rect.x, e.rect.y + e.dy, 50, 50):
                 e.dy = 0
 
+        for b_1 in fireball_group_right:
+            if i[1].colliderect(b_1.rect.x + b_1.dx, b_1.rect.y, 50, 50):
+                b_1.dx = 0
+                b_1.kill()
+            if i[1].colliderect(b_1.rect.x, b_1.rect.y + b_1.dy, 50, 50):
+                b_1.dy = 0
+                b_1.kill()
+
+        for b_2 in fireball_group_left:
+            if i[1].colliderect(b_2.rect.x + b_2.dx, b_2.rect.y, 50, 50):
+                b_2.dx = 0
+                b_2.kill()
+            if i[1].colliderect(b_2.rect.x, b_2.rect.y + b_2.dy, 50, 50):
+                b_2.dy = 0
+                b_2.kill()
+
     for i in Obstacle_list:
         Red_Souls.collision()
 
         for e in Enemy_Group:
             e.collision()
+
+        for b_1 in fireball_group_right:
+            b_1.collision()
+
+        for b_2 in fireball_group_left:
+            b_2.collision()
 
         App.blit(i[0], i[1])
         

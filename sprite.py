@@ -66,12 +66,21 @@ class Ability(sprite.Sprite):
         self.rect = self.ability.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.dx = 0
+        self.dy = 0
 
     def shoot_right(self):
-        self.rect.x += 16
+        self.dx += 16
 
     def shoot_left(self):
-        self.rect.x -= 16
+        self.dx -= 16
+
+    def collision(self):
+        self.rect.x += self.dx
+        self.rect.y += self.dy
+
+        self.dx = 0
+        self.dy = 0
 
 class Enemy(sprite.Sprite):
     def __init__(self, img, x, y):
