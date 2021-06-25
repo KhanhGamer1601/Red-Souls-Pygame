@@ -20,6 +20,8 @@ size = 50
 App = display.set_mode([1016, 600])
 display.set_caption('Red Souls')
 
+Map = transform.scale(image.load('game_img/map.png'), [900, 500])
+
 class World():
     def __init__(self, data):
         self.obstacle_list = []
@@ -151,9 +153,12 @@ class Enemy(sprite.Sprite):
 
 def Load_map(name):
     file = open(name, 'r')
-    data = file.readlines()
+    value = file.read()
     file.close()
+
     playmap = []
+    data = value.split()
+
     for map in data:
         wall = []
         for i in range(len(map)):
@@ -192,6 +197,9 @@ Enemy_Group.add(Goblin_Guard_8)
 Fireball_group = sprite.Group()
 running = True
 while running:
+    App.fill(BLACK)
+    App.blit(Map, [50, 50])
+
     for i in event.get():
         if i.type == QUIT:
             running = False
@@ -207,7 +215,6 @@ while running:
                     fireball.direction = 1
                     Fireball_group.add(fireball)
 
-    App.fill(BLACK)
     world.draw()
 
     for i in Fireball_group:
