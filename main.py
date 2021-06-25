@@ -57,9 +57,6 @@ class Player(sprite.Sprite):
         self.health = 10
         self.dx = 0
         self.dy = 0
-        self.width = self.img.get_width()
-        self.height = self.img.get_height()
-        self.obstacle_collision = False
 
     def move(self):
         Key = key.get_pressed()
@@ -79,10 +76,10 @@ class Player(sprite.Sprite):
             self.turn_state = 'turn_right'
 
         for obstacle in world.obstacle_list:
-            if obstacle[1].colliderect(self.rect.x + self.dx, self.rect.y, self.width, self.height):
+            if obstacle[1].colliderect(self.rect.x + self.dx, self.rect.y, size, size):
                 self.dx = 0
 
-            if obstacle[1].colliderect(self.rect.x, self.rect.y + self.dy, self.width, self.height):
+            if obstacle[1].colliderect(self.rect.x, self.rect.y + self.dy, size, size):
                 self.dy = 0
 
         self.rect.x += self.dx
@@ -133,23 +130,39 @@ class Enemy(sprite.Sprite):
         self.rect.y = y
         self.turn_left = transform.scale(transform.flip(self.img, True, False), [size, size])
         self.run_state = 'ready'
-        self.dx = 1
+        self.dx = 0
+        self.dy = 0
 
     def animation(self):
+        if self.run_state != 'running_left':
+            self.run_state = 'running_right'
+
+        if self.run_state == 'running_right':
+            self.enemy = transform.scale(self.img, [size, size])
+            self.dx = 1
+            if self.rect.x >= 900:
+                self.rect.x = 900
+                self.run_state = 'running_left'
+
+        if self.run_state == 'running_left':
+            self.enemy = self.turn_left
+            self.dx -= 1
+            if self.rect.x <= 50:
+                self.rect.x = 50
+                self.run_state = 'running_right'
+
         for obstacle in world.obstacle_list:
             if obstacle[1].colliderect(self.rect.x + self.dx, self.rect.y, size, size):
-                self.dx *= -1
-            
-            if self.rect.x >= 966 or self.rect.x <= 0:
-                self.dx *= -1
-            
-            if self.dx == 1:
-                self.enemy = transform.scale(self.img, [size, size])
+                self.dx = 0
+                self.run_state = 'running_left'
+                if self.rect.x == 300:
+                    self.run_state = 'running_right'
 
-            if self.dx == -1:
-                self.enemy = self.turn_left
-
-            self.rect.x += self.dx
+            if obstacle[1].colliderect(self.rect.x, self.rect.y + self.dy, size, size):
+                self.dy = 0
+            
+        self.rect.x += self.dx
+        self.rect.y += self.dy
 
 def Load_map(name):
     file = open(name, 'r')
@@ -182,7 +195,7 @@ Goblin_Guard_3 = Enemy(616, 162)
 Goblin_Guard_4 = Enemy(650, 300)
 Goblin_Guard_5 = Enemy(81, 430)
 Goblin_Guard_6 = Enemy(76, 400)
-Goblin_Guard_7 = Enemy(792, 400)
+Goblin_Guard_7 = Enemy(616, 400)
 Goblin_Guard_8 = Enemy(600, 150)
 Enemy_Group.add(Goblin_Guard_0)
 Enemy_Group.add(Goblin_Guard_1)
