@@ -1,4 +1,4 @@
-from pygame import init, key, quit, display, transform, image, sprite, event
+from pygame import init, key, quit, display, transform, image, sprite, event, font
 from pygame.constants import K_a, K_d, K_s, K_w, MOUSEBUTTONDOWN, QUIT
 from random import*
 
@@ -22,6 +22,10 @@ App = display.set_mode([1016, 600])
 display.set_caption('Red Souls')
 
 Map = transform.scale(image.load('game_img/map.png'), [900, 500])
+Game_Font = font.SysFont('Times', 16)
+
+Score = 0
+Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
 
 class World():
     def __init__(self, data):
@@ -142,127 +146,50 @@ class Enemy(sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.turn_left = transform.scale(transform.flip(self.img, True, False), [size, size])
-        self.run_state = 'ready'
-        self.dx = 0
-        self.dy = 0
+        self.dx = 1
 
     def animation(self):
-        if self.run_state != 'running_left':
-            self.run_state = 'running_right'
-
-        if self.run_state == 'running_right':
-            self.enemy = transform.scale(self.img, [size, size])
-            self.dx = 1
-            if self.rect.x >= 900:
-                self.rect.x = 900
-                self.run_state = 'running_left'
-
-        if self.run_state == 'running_left':
-            self.enemy = self.turn_left
-            self.dx -= 1
-            if self.rect.x <= 50:
-                self.rect.x = 50
-                self.run_state = 'running_right'
-
         for obstacle in world.obstacle_list:
             if obstacle[1].colliderect(self.rect.x + self.dx, self.rect.y, size, size):
-                self.dx = 0
-                self.run_state = 'running_left'
-                if self.rect.x == 300:
-                    self.run_state = 'running_right'
-
-            if obstacle[1].colliderect(self.rect.x, self.rect.y + self.dy, size, size):
-                self.dy = 0
+                self.dx *= -1
             
+        if self.rect.x >= 900 or self.rect.x <= 50:
+            self.dx *= -1
+        
+        if self.dx == 1:
+            self.enemy = transform.scale(self.img, [size, size])
+
+        if self.dx == -1:
+            self.enemy = self.turn_left
+
         self.rect.x += self.dx
-        self.rect.y += self.dy
 
 class Boss(sprite.Sprite):
-    def __init__(self, img, health):
+    def __init__(self, img, x, y):
         super().__init__()
         self.img = image.load(img)
-        self.boss = transform.scale(self.img, [size, size])
-        self.rect = self.boss.get_rect()
-        self.rect.x = 450
-        self.rect.y = 250
-        self.dx = 0
-        self.dy = 0
-        self.run_state = 'ready'
-        self.health = health
-        self.ability_type = ''
-        self.direction = 1
+        self.enemy = transform.scale(self.img, [size, size])
+        self.rect = self.enemy.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.turn_left = transform.scale(transform.flip(self.img, True, False), [size, size])
+        self.dx = 1
 
     def move(self):
-        if self.run_state != 'running_left':
-            self.run_state = 'running_right'
-
-        if self.run_state == 'running_right':
-            self.enemy = transform.scale(self.img, [size, size])
-            self.dx = 1
-            if self.rect.x >= 900:
-                self.rect.x = 900
-                self.run_state = 'running_left'
-
-        if self.run_state == 'running_left':
-            self.enemy = self.turn_left
-            self.dx -= 1
-            if self.rect.x <= 50:
-                self.rect.x = 50
-                self.run_state = 'running_right'
-
         for obstacle in world.obstacle_list:
             if obstacle[1].colliderect(self.rect.x + self.dx, self.rect.y, size, size):
-                self.dx = 0
-                self.run_state = 'running_left'
-                if self.rect.x == 300:
-                    self.run_state = 'running_right'
-
-            if obstacle[1].colliderect(self.rect.x, self.rect.y + self.dy, size, size):
-                self.dy = 0
+                self.dx *= -1
             
+        if self.rect.x >= 900 or self.rect.x <= 50:
+            self.dx *= -1
+        
+        if self.dx == 1:
+            self.boss = transform.scale(self.img, [size, size])
+
+        if self.dx == -1:
+            self.boss = self.turn_left
+
         self.rect.x += self.dx
-        self.rect.y += self.dy
-
-    def ability(self):
-        if self.ability_type == 'freeze':
-            self.snowball = transform.scale(image.load('game_img/snowball.png'), [ball_size, ball_size])
-            self.snowball_rect = self.snowball.get_rect()
-            self.snowball_rect.x = self.rect.x
-            self.snowball_rect.y = self.rect.y
-            self.snowball_dx = 0
-            self.snowball_dy = 0
-            self.freeze()
-
-        if self.ability_type == 'cut':
-            self.cut()
-
-        if self.ability_type == 'shoot':
-            self.shoot()
-
-    def freeze(self):
-        self.snowball_dx += 10 * self.direction
-
-        for obstacle in world.obstacle_list:
-            if obstacle[1].colliderect(self.snowball_rect.x + self.snowball_dx, self.snowball_rect.y, ball_size, ball_size):
-                self.snowball_dx = 0
-
-            if obstacle[1].colliderect(self.snowball_rect.x, self.snowball_rect.y + self.snowball_dy, ball_size, ball_size):
-                self.snowball_dy = 0
-
-        self.snowball_rect.x += self.snowball_dx
-        self.snowball_rect.y += self.snowball_dy
-
-    def cut(self):
-        pass
-
-    def shoot(self):
-        self.boss_fireball = Ability(self.rect.x, self.rect.y)
-
-        if self.run_state == 'running_left':
-            self.boss_fireball.direction = -1
-
-        if self.run_state == 'running_right':
-            self.boss_fireball.direction = 1
 
 def Load_map(name):
     file = open(name, 'r')
@@ -309,9 +236,11 @@ Enemy_Group.add(Goblin_Guard_8)
 
 Fireball_group = sprite.Group()
 running = True
+create_boss = 0
 while running:
     App.fill(BLACK)
     App.blit(Map, [50, 50])
+    App.blit(Score_Board, [450, 30])
 
     for i in event.get():
         if i.type == QUIT:
@@ -336,6 +265,10 @@ while running:
         App.blit(i.ability, i.rect)
         if sprite.spritecollide(i, Enemy_Group, True):
             i.kill()
+            Score += 1
+            Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
+            if len(Enemy_Group) <= 0:
+                create_boss = 1
 
     Red_Souls.move()
     App.blit(Red_Souls.player, Red_Souls.rect)
@@ -343,6 +276,11 @@ while running:
     for i in Enemy_Group:
         i.animation()
         App.blit(i.enemy, i.rect)
+
+    if create_boss == 1:
+        boss_1 = Boss('game_img/boss_1.png', 450, 250)
+        boss_1.move()
+        App.blit(boss_1.boss, boss_1.rect)
 
     display.update()
 
