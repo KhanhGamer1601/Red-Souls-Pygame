@@ -16,6 +16,7 @@ BLACK = [0, 0, 0]
 
 game_over = 0
 size = 50
+ball_size = 40
 
 App = display.set_mode([1016, 600])
 display.set_caption('Red Souls')
@@ -109,12 +110,10 @@ class Player(sprite.Sprite):
 class Ability(sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.ability = image.load('game_img/fireball.png')
+        self.ability = transform.scale(image.load('game_img/fireball.png'), [ball_size, ball_size])
         self.rect = self.ability.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.width = self.ability.get_width()
-        self.height = self.ability.get_height()
         self.direction = 1
         self.dx = 0
         self.dy = 0
@@ -123,11 +122,11 @@ class Ability(sprite.Sprite):
         self.dx += 10 * self.direction
 
         for obstacle in world.obstacle_list:
-            if obstacle[1].colliderect(self.rect.x + self.dx, self.rect.y, self.width, self.height):
+            if obstacle[1].colliderect(self.rect.x + self.dx, self.rect.y, ball_size, ball_size):
                 self.dx = 0
                 self.kill()
 
-            if obstacle[1].colliderect(self.rect.x, self.rect.y + self.dy, self.width, self.height):
+            if obstacle[1].colliderect(self.rect.x, self.rect.y + self.dy, ball_size, ball_size):
                 self.dy = 0
                 self.kill()
 
@@ -177,6 +176,93 @@ class Enemy(sprite.Sprite):
             
         self.rect.x += self.dx
         self.rect.y += self.dy
+
+class Boss(sprite.Sprite):
+    def __init__(self, img, health):
+        super().__init__()
+        self.img = image.load(img)
+        self.boss = transform.scale(self.img, [size, size])
+        self.rect = self.boss.get_rect()
+        self.rect.x = 450
+        self.rect.y = 250
+        self.dx = 0
+        self.dy = 0
+        self.run_state = 'ready'
+        self.health = health
+        self.ability_type = ''
+        self.direction = 1
+
+    def move(self):
+        if self.run_state != 'running_left':
+            self.run_state = 'running_right'
+
+        if self.run_state == 'running_right':
+            self.enemy = transform.scale(self.img, [size, size])
+            self.dx = 1
+            if self.rect.x >= 900:
+                self.rect.x = 900
+                self.run_state = 'running_left'
+
+        if self.run_state == 'running_left':
+            self.enemy = self.turn_left
+            self.dx -= 1
+            if self.rect.x <= 50:
+                self.rect.x = 50
+                self.run_state = 'running_right'
+
+        for obstacle in world.obstacle_list:
+            if obstacle[1].colliderect(self.rect.x + self.dx, self.rect.y, size, size):
+                self.dx = 0
+                self.run_state = 'running_left'
+                if self.rect.x == 300:
+                    self.run_state = 'running_right'
+
+            if obstacle[1].colliderect(self.rect.x, self.rect.y + self.dy, size, size):
+                self.dy = 0
+            
+        self.rect.x += self.dx
+        self.rect.y += self.dy
+
+    def ability(self):
+        if self.ability_type == 'freeze':
+            self.snowball = transform.scale(image.load('game_img/snowball.png'), [ball_size, ball_size])
+            self.snowball_rect = self.snowball.get_rect()
+            self.snowball_rect.x = self.rect.x
+            self.snowball_rect.y = self.rect.y
+            self.snowball_dx = 0
+            self.snowball_dy = 0
+            self.freeze()
+
+        if self.ability_type == 'cut':
+            self.cut()
+
+        if self.ability_type == 'shoot':
+            self.shoot()
+
+    def freeze(self):
+        self.snowball_dx += 10 * self.direction
+
+        for obstacle in world.obstacle_list:
+            if obstacle[1].colliderect(self.snowball_rect.x + self.snowball_dx, self.snowball_rect.y, ball_size, ball_size):
+                self.snowball_dx = 0
+
+            if obstacle[1].colliderect(self.snowball_rect.x, self.snowball_rect.y + self.snowball_dy, ball_size, ball_size):
+                self.snowball_dy = 0
+
+        self.snowball_rect.x += self.snowball_dx
+        self.snowball_rect.y += self.snowball_dy
+
+    def cut(self):
+        pass
+
+    def shoot(self):
+        self.boss_fireball = Ability(self.rect.x, self.rect.y)
+
+        if self.run_state == 'running_left':
+            self.boss_fireball.direction = -1
+
+        if self.run_state == 'running_right':
+            self.boss_fireball.direction = 1
 
 def Load_map(name):
     file = open(name, 'r')
@@ -234,6 +320,7 @@ while running:
         if i.type == MOUSEBUTTONDOWN:
             if i.button == 1:
                 fireball = Ability(Red_Souls.rect.x, Red_Souls.rect.y)
+
                 if Red_Souls.turn_state == 'turn_left':
                     fireball.direction = -1
                     Fireball_group.add(fireball)
