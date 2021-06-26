@@ -116,9 +116,23 @@ class Ability(sprite.Sprite):
         self.width = self.ability.get_width()
         self.height = self.ability.get_height()
         self.direction = 1
+        self.dx = 0
+        self.dy = 0
 
     def shoot(self):
-        self.rect.x += 10 * self.direction
+        self.dx += 10 * self.direction
+
+        for obstacle in world.obstacle_list:
+            if obstacle[1].colliderect(self.rect.x + self.dx, self.rect.y, self.width, self.height):
+                self.dx = 0
+                self.kill()
+
+            if obstacle[1].colliderect(self.rect.x, self.rect.y + self.dy, self.width, self.height):
+                self.dy = 0
+                self.kill()
+
+        self.rect.x += self.dx
+        self.rect.y += self.dy
 
 class Enemy(sprite.Sprite):
     def __init__(self, x, y):
