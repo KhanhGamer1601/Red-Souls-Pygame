@@ -168,8 +168,8 @@ class Boss(sprite.Sprite):
     def __init__(self, img, x, y):
         super().__init__()
         self.img = image.load(img)
-        self.enemy = transform.scale(self.img, [size, size])
-        self.rect = self.enemy.get_rect()
+        self.boss = transform.scale(self.img, [size, size])
+        self.rect = self.boss.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.turn_left = transform.scale(transform.flip(self.img, True, False), [size, size])
