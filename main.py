@@ -16,7 +16,7 @@ BLACK = [0, 0, 0]
 
 game_over = 0
 size = 50
-ball_size = 40
+ball_size = 25
 
 App = display.set_mode([1016, 600])
 display.set_caption('Red Souls')
@@ -111,10 +111,14 @@ class Player(sprite.Sprite):
         if self.turn_state == 'turn_right':
             self.player = transform.scale(self.img, [size, size])
 
+    def check_health(self):
+        if self.health <= 0:
+            self.health = 1
+
 class Ability(sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, img, x, y):
         super().__init__()
-        self.ability = transform.scale(image.load('game_img/fireball.png'), [ball_size, ball_size])
+        self.ability = transform.scale(image.load(img), [ball_size, ball_size])
         self.rect = self.ability.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -165,7 +169,7 @@ class Enemy(sprite.Sprite):
         self.rect.x += self.dx
 
 class Boss(sprite.Sprite):
-    def __init__(self, img, x, y):
+    def __init__(self, img, x, y, health, ability_type):
         super().__init__()
         self.img = image.load(img)
         self.boss = transform.scale(self.img, [size, size])
@@ -174,6 +178,8 @@ class Boss(sprite.Sprite):
         self.rect.y = y
         self.turn_left = transform.scale(transform.flip(self.img, True, False), [size, size])
         self.dx = 1
+        self.health = health
+        self.ability_type = ability_type
 
     def move(self):
         for obstacle in world.obstacle_list:
@@ -190,6 +196,18 @@ class Boss(sprite.Sprite):
             self.boss = self.turn_left
 
         self.rect.x += self.dx
+
+    def ability(self):
+        if self.ability_type == 'shoot':
+            boss_fireball = Ability('game_img/fireball.png', self.rect.x, self.rect.y)
+
+            if self.dx == 1:
+                boss_fireball.direction = 1
+                Enemy_fireball_group.add(boss_fireball)
+
+            if self.dx == -1:
+                boss_fireball.direction = -1
+                Enemy_fireball_group.add(boss_fireball)
 
 def Load_map(name):
     file = open(name, 'r')
@@ -213,6 +231,7 @@ world_data = Load_map('map.txt')
 world = World(world_data)
 Red_Souls = Player(100, 500)
 
+Health_Board = Game_Font.render('Health: {}'.format(Red_Souls.health), True, RED)
 Enemy_Group = sprite.Group()
 
 Goblin_Guard_0 = Enemy(300, 250)
@@ -235,12 +254,19 @@ Enemy_Group.add(Goblin_Guard_7)
 Enemy_Group.add(Goblin_Guard_8)
 
 Fireball_group = sprite.Group()
+Enemy_fireball_group = sprite.Group()
+Player_group = sprite.Group()
+
+Player_group.add(Red_Souls)
+
 running = True
 create_boss = 0
+boss_1 = Boss('game_img/boss_1.png', 450, 250, 500, 'shoot')
 while running:
     App.fill(BLACK)
     App.blit(Map, [50, 50])
     App.blit(Score_Board, [450, 30])
+    App.blit(Health_Board, [250, 30])
 
     for i in event.get():
         if i.type == QUIT:
@@ -248,7 +274,7 @@ while running:
         
         if i.type == MOUSEBUTTONDOWN:
             if i.button == 1:
-                fireball = Ability(Red_Souls.rect.x, Red_Souls.rect.y)
+                fireball = Ability('game_img/fireball.png', Red_Souls.rect.x, Red_Souls.rect.y)
 
                 if Red_Souls.turn_state == 'turn_left':
                     fireball.direction = -1
@@ -260,6 +286,12 @@ while running:
 
     world.draw()
 
+    if sprite.spritecollide(Red_Souls, Enemy_Group, False):
+        Red_Souls.health -= 1
+        Health_Board = Game_Font.render('Health: {}'.format(Red_Souls.health), True, RED)
+        Red_Souls.rect.x = 100
+        Red_Souls.rect.y = 500
+
     for i in Fireball_group:
         i.shoot()
         App.blit(i.ability, i.rect)
@@ -270,7 +302,17 @@ while running:
             if len(Enemy_Group) <= 0:
                 create_boss = 1
 
+    for i in Enemy_fireball_group:
+        i.shoot()
+        App.blit(i.ability, i.rect)
+        if sprite.spritecollide(i, Player_group, False):
+            Red_Souls.health -= 1
+            Health_Board = Game_Font.render('Health: {}'.format(Red_Souls.health), True, RED)
+            Red_Souls.rect.x = 100
+            Red_Souls.rect.y = 500
+
     Red_Souls.move()
+    Red_Souls.check_health()
     App.blit(Red_Souls.player, Red_Souls.rect)
 
     for i in Enemy_Group:
@@ -278,8 +320,8 @@ while running:
         App.blit(i.enemy, i.rect)
 
     if create_boss == 1:
-        boss_1 = Boss('game_img/boss_1.png', 450, 250)
         boss_1.move()
+        boss_1.ability()
         App.blit(boss_1.boss, boss_1.rect)
 
     display.update()
