@@ -59,7 +59,7 @@ class Player(sprite.Sprite):
         self.rect.y = y
         self.turn_left = transform.scale(transform.flip(self.img, True, False), [size, size])
         self.turn_state = 'ready'
-        self.health = 10
+        self.health = 16
         self.dx = 0
         self.dy = 0
 
@@ -256,12 +256,15 @@ Enemy_Group.add(Goblin_Guard_8)
 Fireball_group = sprite.Group()
 Enemy_fireball_group = sprite.Group()
 Player_group = sprite.Group()
+Boss_group = sprite.Group()
 
 Player_group.add(Red_Souls)
 
 running = True
 create_boss = 0
-boss_1 = Boss('game_img/boss_1.png', 450, 250, 500, 'shoot')
+boss_1 = Boss('game_img/boss_1.png', 450, 250, 60, 'shoot')
+Boss_group.add(boss_1)
+Boss_Health_Board = Game_Font.render('Boss Health: {}'.format(boss_1.health), True, RED)
 while running:
     App.fill(BLACK)
     App.blit(Map, [50, 50])
@@ -302,6 +305,16 @@ while running:
             if len(Enemy_Group) <= 0:
                 create_boss = 1
 
+        if sprite.spritecollide(i, Boss_group, False):
+            i.kill()
+            Score += 1
+            Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
+            for j in Boss_group:
+                j.health -= 1
+                Boss_Health_Board = Game_Font.render('Boss Health: {}'.format(j.health), True, RED)
+                if j.health == 0:
+                    j.kill()
+
     for i in Enemy_fireball_group:
         i.shoot()
         App.blit(i.ability, i.rect)
@@ -323,6 +336,7 @@ while running:
         boss_1.move()
         boss_1.ability()
         App.blit(boss_1.boss, boss_1.rect)
+        App.blit(Boss_Health_Board, [650, 30])
 
     display.update()
 
