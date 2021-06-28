@@ -264,12 +264,15 @@ running = True
 create_boss = 0
 boss_1 = Boss('game_img/boss_1.png', 450, 250, 60, 'shoot')
 Boss_group.add(boss_1)
-Boss_Health_Board = Game_Font.render('Boss Health: {}'.format(boss_1.health), True, RED)
+
+Boss_Health = 0
+Boss_Health_Board = Game_Font.render('Boss Health: {}'.format(Boss_Health), True, RED)
 while running:
     App.fill(BLACK)
     App.blit(Map, [50, 50])
     App.blit(Score_Board, [450, 30])
     App.blit(Health_Board, [250, 30])
+    App.blit(Boss_Health_Board, [650, 30])
 
     for i in event.get():
         if i.type == QUIT:
@@ -311,9 +314,6 @@ while running:
             Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
             for j in Boss_group:
                 j.health -= 1
-                Boss_Health_Board = Game_Font.render('Boss Health: {}'.format(j.health), True, RED)
-                if j.health == 0:
-                    j.kill()
 
     for i in Enemy_fireball_group:
         i.shoot()
@@ -336,7 +336,11 @@ while running:
         boss_1.move()
         boss_1.ability()
         App.blit(boss_1.boss, boss_1.rect)
-        App.blit(Boss_Health_Board, [650, 30])
+        Boss_Health = boss_1.health
+        Boss_Health_Board = Game_Font.render('Boss Health: {}'.format(Boss_Health), True, RED)
+        if boss_1.health <= 0:
+            boss_1.kill()
+            create_boss = 0
 
     display.update()
 
