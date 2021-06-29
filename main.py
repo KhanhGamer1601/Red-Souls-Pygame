@@ -380,8 +380,6 @@ while running:
             game_match = 2
 
     if game_match == 2:
-        Red_Souls.health = 16
-        
         if sprite.spritecollide(Red_Souls, Enemy_Group_2, False):
             Red_Souls.health -= 1
             Health_Board = Game_Font.render('Health: {}'.format(Red_Souls.health), True, RED)
