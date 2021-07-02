@@ -127,6 +127,12 @@ class Ability(sprite.Sprite):
         self.dy = 0
 
     def shoot(self):
+        if self.rect.x >= 1016:
+            self.kill()
+
+        if self.rect.x <= 0:
+            self.kill()
+
         self.dx += 10 * self.direction
 
         for obstacle in world.obstacle_list:
