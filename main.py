@@ -15,8 +15,9 @@ BLUE = [100, 100, 255]
 BLACK = [0, 0, 0]
 
 game_over = 0
-size = 50
+obstacle_size = 50
 ball_size = 25
+size = 50
 
 App = display.set_mode([1016, 600])
 display.set_caption('Red Souls')
@@ -36,15 +37,15 @@ class World():
             column_count = 0
             for obstacle in row:
                 if obstacle == 1:
-                    block = transform.scale(image.load('game_img/obstacle.png'), [size, size])
+                    block = transform.scale(self.block, [obstacle_size, obstacle_size])
                     block_rect = block.get_rect()
-                    block_rect.x = column_count * size
-                    block_rect.y = row_count * size
+                    block_rect.x = column_count * obstacle_size
+                    block_rect.y = row_count * obstacle_size
                     obstacle = (block, block_rect)
                     self.obstacle_list.append(obstacle)
                 column_count += 1
             row_count += 1
-    
+
     def draw(self):
         for obstacle in self.obstacle_list:
             App.blit(obstacle[0], obstacle[1])
@@ -114,7 +115,7 @@ class Player(sprite.Sprite):
     def check_health(self):
         if self.health <= 0:
             self.health = 1
-
+            
 class Ability(sprite.Sprite):
     def __init__(self, img, x, y):
         super().__init__()
@@ -123,29 +124,16 @@ class Ability(sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.direction = 1
-        self.dx = 0
-        self.dy = 0
 
     def shoot(self):
-        if self.rect.x >= 1016:
-            self.kill()
-
-        if self.rect.x <= 0:
-            self.kill()
-
-        self.dx += 10 * self.direction
+        self.rect.x += 10 * self.direction
 
         for obstacle in world.obstacle_list:
-            if obstacle[1].colliderect(self.rect.x + self.dx, self.rect.y, ball_size, ball_size):
-                self.dx = 0
+            if obstacle[1].colliderect(self.rect.x, self.rect.y, ball_size, ball_size):
                 self.kill()
 
-            if obstacle[1].colliderect(self.rect.x, self.rect.y + self.dy, ball_size, ball_size):
-                self.dy = 0
+            if obstacle[1].colliderect(self.rect.x, self.rect.y, ball_size, ball_size):
                 self.kill()
-
-        self.rect.x += self.dx
-        self.rect.y += self.dy
 
 class Enemy(sprite.Sprite):
     def __init__(self, img, x, y):
@@ -244,7 +232,6 @@ world_data = Load_map('map.txt')
 world = World(world_data)
 Red_Souls = Player(100, 500)
 
-Health_Board = Game_Font.render('Health: {}'.format(Red_Souls.health), True, RED)
 Enemy_Group_1 = sprite.Group()
 Enemy_Group_2 = sprite.Group()
 
@@ -267,51 +254,17 @@ Enemy_Group_1.add(Enemy_6)
 Enemy_Group_1.add(Enemy_7)
 Enemy_Group_1.add(Enemy_8)
 
-Enemy_0 = Enemy('game_img/enemy_2.png', 300, 250)
-Enemy_1 = Enemy('game_img/enemy_2.png', 203, 50)
-Enemy_2 = Enemy('game_img/enemy_2.png', 379, 155)
-Enemy_3 = Enemy('game_img/enemy_2.png', 616, 162)
-Enemy_4 = Enemy('game_img/enemy_2.png', 650, 300)
-Enemy_5 = Enemy('game_img/enemy_2.png', 400, 430)
-Enemy_6 = Enemy('game_img/enemy_2.png', 450, 400)
-Enemy_7 = Enemy('game_img/enemy_2.png', 616, 400)
-Enemy_8 = Enemy('game_img/enemy_2.png', 600, 150)
-Enemy_Group_2.add(Enemy_0)
-Enemy_Group_2.add(Enemy_1)
-Enemy_Group_2.add(Enemy_2)
-Enemy_Group_2.add(Enemy_3)
-Enemy_Group_2.add(Enemy_4)
-Enemy_Group_2.add(Enemy_5)
-Enemy_Group_2.add(Enemy_6)
-Enemy_Group_2.add(Enemy_7)
-Enemy_Group_2.add(Enemy_8)
-
 Fireball_group = sprite.Group()
 Enemy_fireball_group = sprite.Group()
 Player_group = sprite.Group()
 Boss_group = sprite.Group()
 
-Player_group.add(Red_Souls)
-
 running = True
 create_boss = 0
 game_match = 1
-
-boss_1 = Boss('game_img/boss_1.png', 60, 'shoot')
-Boss_group.add(boss_1)
-
-boss_2 = Boss('game_img/boss_2.png', 120, 'cut')
-Boss_group.add(boss_2)
-
 Boss_Health = 0
-Boss_Health_Board = Game_Font.render('Boss Health: {}'.format(Boss_Health), True, RED)
-while running:
-    App.fill(BLACK)
-    App.blit(Map, [50, 50])
-    App.blit(Score_Board, [450, 30])
-    App.blit(Health_Board, [250, 30])
-    App.blit(Boss_Health_Board, [650, 30])
 
+while running:
     for i in event.get():
         if i.type == QUIT:
             running = False
@@ -327,107 +280,73 @@ while running:
                 if Red_Souls.turn_state == 'turn_right':
                     fireball.direction = 1
                     Fireball_group.add(fireball)
+       
+    App.fill(BLACK)
 
+    Health_Board = Game_Font.render('Health: {}'.format(Red_Souls.health), True, RED)
+    Boss_Health_Board = Game_Font.render('Boss Health: {}'.format(Boss_Health), True, RED)
+    Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
+
+    App.blit(Score_Board, [450, 30])
+    App.blit(Health_Board, [250, 30])
+    App.blit(Boss_Health_Board, [650, 30])
+    App.blit(Map, [50, 50])
+    
     world.draw()
-
-    if sprite.spritecollide(Red_Souls, Enemy_Group_1, False):
-        Red_Souls.health -= 1
-        Health_Board = Game_Font.render('Health: {}'.format(Red_Souls.health), True, RED)
-        Red_Souls.rect.x = 100
-        Red_Souls.rect.y = 500
-
+    
     for i in Fireball_group:
         i.shoot()
         App.blit(i.ability, i.rect)
         if sprite.spritecollide(i, Enemy_Group_1, True):
             i.kill()
             Score += 1
-            Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
-            if len(Enemy_Group_1) <= 0:
-                create_boss = 1
 
-    for i in Enemy_fireball_group:
-        i.shoot()
-        App.blit(i.ability, i.rect)
-        if sprite.spritecollide(i, Player_group, False):
-            Red_Souls.health -= 1
-            Health_Board = Game_Font.render('Health: {}'.format(Red_Souls.health), True, RED)
-            Red_Souls.rect.x = 100
-            Red_Souls.rect.y = 500
+        if i.rect.x >= 1016 or i.rect.x <= 0:
+            i.kill()
 
-    Red_Souls.move()
-    Red_Souls.check_health()
-    App.blit(Red_Souls.player, Red_Souls.rect)
-
-    for i in Enemy_Group_1:
-        i.animation()
-        App.blit(i.enemy, i.rect)
-
-    if create_boss == 1:
-        for i in Fireball_group:
-            i.shoot()
-            App.blit(i.ability, i.rect)
-
+        if create_boss == 2:
             if sprite.spritecollide(i, Boss_group, False):
                 i.kill()
                 Score += 1
-                Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
                 for j in Boss_group:
                     j.health -= 1
+                    Boss_Health = j.health
 
+        if len(Enemy_Group_1) <= 0:
+                create_boss = 1
+
+    if create_boss == 1:
+        boss_1 = Boss('game_img/boss_1.png', 60, 'shoot')
+        Boss_group.add(boss_1)
+        create_boss = 2
+        Boss_Health = boss_1.health
+
+    if create_boss == 2:
         boss_1.move()
         boss_1.ability()
         App.blit(boss_1.boss, boss_1.rect)
-        Boss_Health = boss_1.health
-        Boss_Health_Board = Game_Font.render('Boss Health: {}'.format(Boss_Health), True, RED)
-        if boss_1.health <= 0:
-            boss_1.kill()
-            create_boss = 0
-            game_match = 2
 
-    if game_match == 2:
-        if sprite.spritecollide(Red_Souls, Enemy_Group_2, False):
-            Red_Souls.health -= 1
-            Health_Board = Game_Font.render('Health: {}'.format(Red_Souls.health), True, RED)
-            Red_Souls.rect.x = 100
-            Red_Souls.rect.y = 500
-
-        for i in Fireball_group:
+        for i in Enemy_fireball_group:
             i.shoot()
-            App.blit(i.ability, i.rect)
-            if sprite.spritecollide(i, Enemy_Group_2, True):
-                i.kill()
-                Score += 1
-                Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
-                if len(Enemy_Group_2) <= 0:
-                    create_boss = 2
+            App.blit(i.ability,i.rect)  
 
-        for i in Enemy_Group_2:
-            i.animation()
-            App.blit(i.enemy, i.rect)
+    Red_Souls.move()
+    App.blit(Red_Souls.player,Red_Souls.rect)
 
-    if create_boss == 2:
-        for i in Fireball_group:
-            i.shoot()
-            App.blit(i.ability, i.rect)
+    if sprite.spritecollide(Red_Souls, Enemy_Group_1, False):
+        Red_Souls.health -= 1
+        Red_Souls.rect.x = 100
+        Red_Souls.rect.y = 500
 
-            if sprite.spritecollide(i, Boss_group, False):
-                i.kill()
-                Score += 1
-                Score_Board = Game_Font.render('Score: {}'.format(Score), True, RED)
-                for j in Boss_group:
-                    j.health -= 1
-
-        boss_2.move()
-        boss_2.ability()
-        App.blit(boss_2.boss, boss_2.rect)
-        Boss_Health = boss_2.health
-        Boss_Health_Board = Game_Font.render('Boss Health: {}'.format(Boss_Health), True, RED)
-        if boss_2.health <= 0:
-            boss_2.kill()
-            create_boss = 0
-            game_match = 3
+    if sprite.spritecollide(Red_Souls, Boss_group, False):
+        Red_Souls.health -= 1
+        Red_Souls.rect.x = 100
+        Red_Souls.rect.y = 500
+    
+    for i in Enemy_Group_1:
+        i.animation()
+        App.blit(i.enemy,i.rect)
 
     display.update()
-
+    
 quit()
