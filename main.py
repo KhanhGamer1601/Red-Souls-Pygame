@@ -1,6 +1,7 @@
-from pygame import init, key, quit, display, transform, image, sprite, event, font
+from pygame import init, key, quit, display, transform, image, sprite, event, font, mixer
 from pygame.constants import K_a, K_d, K_s, K_w, MOUSEBUTTONDOWN, QUIT
 from random import*
+from time import*
 
 init()
 
@@ -18,6 +19,10 @@ game_over = 0
 obstacle_size = 50
 ball_size = 25
 size = 50
+
+win_sound = mixer.Sound('game_sound/win.mp3')
+fireball_sound = mixer.Sound('game_sound/fireball.mp3')
+move_sound = mixer.Sound('game_sound/move.mp3')
 
 App = display.set_mode([1016, 600])
 display.set_caption('Red Souls')
@@ -68,16 +73,20 @@ class Player(sprite.Sprite):
         Key = key.get_pressed()
 
         if Key[K_w]:
+            move_sound.play()
             self.dy -= 1
 
         if Key[K_s]:
+            move_sound.play()
             self.dy = 1
 
         if Key[K_a]:
+            move_sound.play()
             self.dx -= 1
             self.turn_state = 'turn_left'
 
         if Key[K_d]:
+            move_sound.play()
             self.dx = 1
             self.turn_state = 'turn_right'
 
@@ -162,8 +171,29 @@ class Enemy(sprite.Sprite):
 
         self.rect.x += self.dx
 
+class Boss_Ability(sprite.Sprite):
+    def __init__(self, x, y, direction_x, direction_y):
+        super().__init__()
+        self.ability = transform.scale(image.load('game_img/fireball.png'), [ball_size, ball_size])
+        self.rect = self.ability.get_rect()
+        self.rect.x = x + 58
+        self.rect.y = y + 58
+        self.direction_x = direction_x
+        self.direction_y = direction_y
+
+    def shoot(self):
+        self.rect.x += 10 * self.direction_x
+        self.rect.y += 10 * self.direction_y
+
+        for obstacle in world.obstacle_list:
+            if obstacle[1].colliderect(self.rect.x + 10 * self.direction_x, self.rect.y, ball_size, ball_size):
+                self.kill()
+
+            if obstacle[1].colliderect(self.rect.x, self.rect.y + 10 * self.direction_y, ball_size, ball_size):
+                self.kill()
+                
 class Boss(sprite.Sprite):
-    def __init__(self, img, health, ability_type):
+    def __init__(self, img, health):
         super().__init__()
         self.img = image.load(img)
         self.boss = transform.scale(self.img, [116, 116])
@@ -173,7 +203,6 @@ class Boss(sprite.Sprite):
         self.turn_left = transform.scale(transform.flip(self.img, True, False), [116, 116])
         self.dx = 1
         self.health = health
-        self.ability_type = ability_type
 
     def move(self):
         for obstacle in world.obstacle_list:
@@ -190,26 +219,7 @@ class Boss(sprite.Sprite):
             self.boss = self.turn_left
 
         self.rect.x += self.dx
-
-    def ability(self):
-        if self.ability_type == 'shoot':
-            boss_fireball = Ability('game_img/fireball.png', self.rect.x, self.rect.y)
-
-            if self.dx == 1:
-                boss_fireball.direction = 1
-                Enemy_fireball_group.add(boss_fireball)
-
-            if self.dx == -1:
-                boss_fireball.direction = -1
-                Enemy_fireball_group.add(boss_fireball)
-
-        if self.ability_type == 'cut':
-            if sprite.spritecollide(Red_Souls, Boss_group, False):
-                Red_Souls.health -= 1
-                Health_Board = Game_Font.render('Health: {}'.format(Red_Souls.health), True, RED)
-                Red_Souls.rect.x = 100
-                Red_Souls.rect.y = 500
-
+            
 def Load_map(name):
     file = open(name, 'r')
     value = file.read()
@@ -234,6 +244,7 @@ Red_Souls = Player(100, 500)
 
 Enemy_Group_1 = sprite.Group()
 Enemy_Group_2 = sprite.Group()
+Enemy_Group_3 = sprite.Group()
 
 Enemy_0 = Enemy('game_img/enemy_1.png', 300, 250)
 Enemy_1 = Enemy('game_img/enemy_1.png', 203, 50)
@@ -272,6 +283,7 @@ while running:
         if i.type == MOUSEBUTTONDOWN:
             if i.button == 1:
                 fireball = Ability('game_img/fireball.png', Red_Souls.rect.x, Red_Souls.rect.y)
+                fireball_sound.play()
 
                 if Red_Souls.turn_state == 'turn_left':
                     fireball.direction = -1
@@ -293,42 +305,215 @@ while running:
     App.blit(Map, [50, 50])
     
     world.draw()
-    
+          
     for i in Fireball_group:
         i.shoot()
         App.blit(i.ability, i.rect)
-        if sprite.spritecollide(i, Enemy_Group_1, True):
-            i.kill()
-            Score += 1
+        if create_boss == 0:
+            if sprite.spritecollide(i, Enemy_Group_1, True):
+                i.kill()
+                Score += 1
+
+            if len(Enemy_Group_1) <= 0:
+                create_boss += 1
+
+        if create_boss == 3:
+            if sprite.spritecollide(i, Enemy_Group_2, True):
+                i.kill()
+                Score += 1
+                
+            if len(Enemy_Group_2) <= 0:
+                create_boss += 1
+
+        if create_boss == 6:
+            if sprite.spritecollide(i, Enemy_Group_3, True):
+                i.kill()
+                Score += 1
+
+            if len(Enemy_Group_3) <= 0:
+                create_boss += 1
 
         if i.rect.x >= 1016 or i.rect.x <= 0:
             i.kill()
 
-        if create_boss == 2:
+        if create_boss == 2 or create_boss == 5 or create_boss == 8:
             if sprite.spritecollide(i, Boss_group, False):
                 i.kill()
                 Score += 1
                 for j in Boss_group:
                     j.health -= 1
                     Boss_Health = j.health
-
-        if len(Enemy_Group_1) <= 0:
-                create_boss = 1
+            break
 
     if create_boss == 1:
-        boss_1 = Boss('game_img/boss_1.png', 60, 'shoot')
+        a = time()
+        b = time()
+        boss_1 = Boss('game_img/boss_1.png', 5)
         Boss_group.add(boss_1)
+        bullet_1 = Boss_Ability(boss_1.rect.x, boss_1.rect.y, 1, 0)
+        bullet_2 = Boss_Ability(boss_1.rect.x, boss_1.rect.y, -1, 0)
+        bullet_3 = Boss_Ability(boss_1.rect.x, boss_1.rect.y, 0, 1)
+        bullet_4 = Boss_Ability(boss_1.rect.x, boss_1.rect.y, 0, -1)
+        Enemy_fireball_group.add(bullet_1)
+        Enemy_fireball_group.add(bullet_2)
+        Enemy_fireball_group.add(bullet_3)
+        Enemy_fireball_group.add(bullet_4)
         create_boss = 2
         Boss_Health = boss_1.health
 
     if create_boss == 2:
+        b = time()
         boss_1.move()
-        boss_1.ability()
+        if b - a > 1:
+            bullet_1 = Boss_Ability(boss_1.rect.x, boss_1.rect.y, 1, 0)
+            bullet_2 = Boss_Ability(boss_1.rect.x, boss_1.rect.y, -1, 0)
+            bullet_3 = Boss_Ability(boss_1.rect.x, boss_1.rect.y, 0, 1)
+            bullet_4 = Boss_Ability(boss_1.rect.x, boss_1.rect.y, 0, -1)
+            Enemy_fireball_group.add(bullet_1)
+            Enemy_fireball_group.add(bullet_2)
+            Enemy_fireball_group.add(bullet_3)
+            Enemy_fireball_group.add(bullet_4)
+            a = b
         App.blit(boss_1.boss, boss_1.rect)
 
         for i in Enemy_fireball_group:
             i.shoot()
-            App.blit(i.ability,i.rect)  
+            App.blit(i.ability, i.rect)  
+
+        if Boss_Health == 0:
+            boss_1.kill()
+
+            for i in Boss_group:
+                i.kill()
+
+            for i in Enemy_fireball_group:
+                i.kill()
+
+            Enemy_0 = Enemy('game_img/enemy_2.png', 300, 250)
+            Enemy_1 = Enemy('game_img/enemy_2.png', 203, 50)
+            Enemy_2 = Enemy('game_img/enemy_2.png', 379, 155)
+            Enemy_3 = Enemy('game_img/enemy_2.png', 616, 162)
+            Enemy_4 = Enemy('game_img/enemy_2.png', 650, 300)
+            Enemy_5 = Enemy('game_img/enemy_2.png', 400, 430)
+            Enemy_6 = Enemy('game_img/enemy_2.png', 450, 400)
+            Enemy_7 = Enemy('game_img/enemy_2.png', 616, 400)
+            Enemy_8 = Enemy('game_img/enemy_2.png', 600, 150)
+            Enemy_Group_2.add(Enemy_0)
+            Enemy_Group_2.add(Enemy_1)
+            Enemy_Group_2.add(Enemy_2)
+            Enemy_Group_2.add(Enemy_3)
+            Enemy_Group_2.add(Enemy_4)
+            Enemy_Group_2.add(Enemy_5)
+            Enemy_Group_2.add(Enemy_6)
+            Enemy_Group_2.add(Enemy_7)
+            Enemy_Group_2.add(Enemy_8)
+            create_boss += 1
+
+    if create_boss == 4:
+        a = time()
+        b = time()
+        boss_2 = Boss('game_img/boss_2.png', 5)
+        Boss_group.add(boss_2)
+        bullet_1 = Boss_Ability(boss_2.rect.x, boss_2.rect.y, 1, 0)
+        bullet_2 = Boss_Ability(boss_2.rect.x, boss_2.rect.y, -1, 0)
+        bullet_3 = Boss_Ability(boss_2.rect.x, boss_2.rect.y, 0, 1)
+        bullet_4 = Boss_Ability(boss_2.rect.x, boss_2.rect.y, 0, -1)
+        Enemy_fireball_group.add(bullet_1)
+        Enemy_fireball_group.add(bullet_2)
+        Enemy_fireball_group.add(bullet_3)
+        Enemy_fireball_group.add(bullet_4)
+        create_boss = 5
+        Boss_Health = boss_2.health
+
+    if create_boss == 5:
+        b = time()
+        boss_2.move()
+        if b - a > 1:
+            bullet_1 = Boss_Ability(boss_2.rect.x, boss_2.rect.y, 1, 0)
+            bullet_2 = Boss_Ability(boss_2.rect.x, boss_2.rect.y, -1, 0)
+            bullet_3 = Boss_Ability(boss_2.rect.x, boss_2.rect.y, 0, 1)
+            bullet_4 = Boss_Ability(boss_2.rect.x, boss_2.rect.y, 0, -1)
+            Enemy_fireball_group.add(bullet_1)
+            Enemy_fireball_group.add(bullet_2)
+            Enemy_fireball_group.add(bullet_3)
+            Enemy_fireball_group.add(bullet_4)
+            a = b
+        App.blit(boss_2.boss, boss_2.rect)
+
+        for i in Enemy_fireball_group:
+            i.shoot()
+            App.blit(i.ability, i.rect) 
+
+        if Boss_Health == 0:
+            boss_2.kill()
+
+            for i in Boss_group:
+                i.kill()
+
+            for i in Enemy_fireball_group:
+                i.kill()
+
+            Enemy_0 = Enemy('game_img/enemy_3.png', 300, 250)
+            Enemy_1 = Enemy('game_img/enemy_3.png', 203, 50)
+            Enemy_2 = Enemy('game_img/enemy_3.png', 379, 155)
+            Enemy_3 = Enemy('game_img/enemy_3.png', 616, 162)
+            Enemy_4 = Enemy('game_img/enemy_3.png', 650, 300)
+            Enemy_5 = Enemy('game_img/enemy_3.png', 400, 430)
+            Enemy_6 = Enemy('game_img/enemy_3.png', 450, 400)
+            Enemy_7 = Enemy('game_img/enemy_3.png', 616, 400)
+            Enemy_8 = Enemy('game_img/enemy_3.png', 600, 150)
+            Enemy_Group_3.add(Enemy_0)
+            Enemy_Group_3.add(Enemy_1)
+            Enemy_Group_3.add(Enemy_2)
+            Enemy_Group_3.add(Enemy_3)
+            Enemy_Group_3.add(Enemy_4)
+            Enemy_Group_3.add(Enemy_5)
+            Enemy_Group_3.add(Enemy_6)
+            Enemy_Group_3.add(Enemy_7)
+            Enemy_Group_3.add(Enemy_8)
+            create_boss += 1
+
+    if create_boss == 7:
+        a = time()
+        b = time()
+        boss_3 = Boss('game_img/boss_3.png', 5)
+        Boss_group.add(boss_3)
+        bullet_1 = Boss_Ability(boss_3.rect.x, boss_3.rect.y, 1, 0)
+        bullet_2 = Boss_Ability(boss_3.rect.x, boss_3.rect.y, -1, 0)
+        bullet_3 = Boss_Ability(boss_3.rect.x, boss_3.rect.y, 0, 1)
+        bullet_4 = Boss_Ability(boss_3.rect.x, boss_3.rect.y, 0, -1)
+        Enemy_fireball_group.add(bullet_1)
+        Enemy_fireball_group.add(bullet_2)
+        Enemy_fireball_group.add(bullet_3)
+        Enemy_fireball_group.add(bullet_4)
+        create_boss = 8
+        Boss_Health = boss_3.health
+
+    if create_boss == 8:
+        b = time()
+        boss_3.move()
+        if b - a > 1:
+            bullet_1 = Boss_Ability(boss_3.rect.x, boss_3.rect.y, 1, 0)
+            bullet_2 = Boss_Ability(boss_3.rect.x, boss_3.rect.y, -1, 0)
+            bullet_3 = Boss_Ability(boss_3.rect.x, boss_3.rect.y, 0, 1)
+            bullet_4 = Boss_Ability(boss_3.rect.x, boss_3.rect.y, 0, -1)
+            Enemy_fireball_group.add(bullet_1)
+            Enemy_fireball_group.add(bullet_2)
+            Enemy_fireball_group.add(bullet_3)
+            Enemy_fireball_group.add(bullet_4)
+            a = b
+        App.blit(boss_3.boss, boss_3.rect)
+
+        for i in Enemy_fireball_group:
+            i.shoot()
+            App.blit(i.ability, i.rect) 
+
+        if Boss_Health == 0:
+            boss_3.kill()
+            create_boss = 9
+
+    if create_boss == 9:
+        win_sound.play()
 
     Red_Souls.move()
     App.blit(Red_Souls.player,Red_Souls.rect)
@@ -342,10 +527,35 @@ while running:
         Red_Souls.health -= 1
         Red_Souls.rect.x = 100
         Red_Souls.rect.y = 500
+
+    if sprite.spritecollide(Red_Souls, Enemy_fireball_group, False):
+        Red_Souls.health -= 1
+        Red_Souls.rect.x = 100
+        Red_Souls.rect.y = 500
     
     for i in Enemy_Group_1:
         i.animation()
-        App.blit(i.enemy,i.rect)
+        App.blit(i.enemy, i.rect)
+
+    if create_boss == 3:
+        if sprite.spritecollide(Red_Souls, Enemy_Group_2, False):
+            Red_Souls.health -= 1
+            Red_Souls.rect.x = 100
+            Red_Souls.rect.y = 500
+
+        for i in Enemy_Group_2:
+            i.animation()
+            App.blit(i.enemy, i.rect)
+
+    if create_boss == 6:
+        if sprite.spritecollide(Red_Souls, Enemy_Group_3, False):
+            Red_Souls.health -= 1
+            Red_Souls.rect.x = 100
+            Red_Souls.rect.y = 500
+
+        for i in Enemy_Group_3:
+            i.animation()
+            App.blit(i.enemy, i.rect)
 
     display.update()
     
