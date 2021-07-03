@@ -22,7 +22,7 @@ size = 50
 
 win_sound = mixer.Sound('game_sound/win.mp3')
 fireball_sound = mixer.Sound('game_sound/fireball.mp3')
-move_sound = mixer.Sound('game_sound/move.mp3')
+damage_sound = mixer.Sound('game_sound/damage.mp3')
 
 App = display.set_mode([1016, 600])
 display.set_caption('Red Souls')
@@ -73,20 +73,16 @@ class Player(sprite.Sprite):
         Key = key.get_pressed()
 
         if Key[K_w]:
-            move_sound.play()
             self.dy -= 1
 
         if Key[K_s]:
-            move_sound.play()
             self.dy = 1
 
         if Key[K_a]:
-            move_sound.play()
             self.dx -= 1
             self.turn_state = 'turn_left'
 
         if Key[K_d]:
-            move_sound.play()
             self.dx = 1
             self.turn_state = 'turn_right'
 
@@ -311,6 +307,7 @@ while running:
         App.blit(i.ability, i.rect)
         if create_boss == 0:
             if sprite.spritecollide(i, Enemy_Group_1, True):
+                damage_sound.play()
                 i.kill()
                 Score += 1
 
@@ -319,6 +316,7 @@ while running:
 
         if create_boss == 3:
             if sprite.spritecollide(i, Enemy_Group_2, True):
+                damage_sound.play()
                 i.kill()
                 Score += 1
                 
@@ -327,6 +325,7 @@ while running:
 
         if create_boss == 6:
             if sprite.spritecollide(i, Enemy_Group_3, True):
+                damage_sound.play()
                 i.kill()
                 Score += 1
 
@@ -338,6 +337,7 @@ while running:
 
         if create_boss == 2 or create_boss == 5 or create_boss == 8:
             if sprite.spritecollide(i, Boss_group, False):
+                damage_sound.play()
                 i.kill()
                 Score += 1
                 for j in Boss_group:
@@ -519,16 +519,19 @@ while running:
     App.blit(Red_Souls.player,Red_Souls.rect)
 
     if sprite.spritecollide(Red_Souls, Enemy_Group_1, False):
+        damage_sound.play()
         Red_Souls.health -= 1
         Red_Souls.rect.x = 100
         Red_Souls.rect.y = 500
 
     if sprite.spritecollide(Red_Souls, Boss_group, False):
+        damage_sound.play()
         Red_Souls.health -= 1
         Red_Souls.rect.x = 100
         Red_Souls.rect.y = 500
 
     if sprite.spritecollide(Red_Souls, Enemy_fireball_group, False):
+        damage_sound.play()
         Red_Souls.health -= 1
         Red_Souls.rect.x = 100
         Red_Souls.rect.y = 500
@@ -539,6 +542,7 @@ while running:
 
     if create_boss == 3:
         if sprite.spritecollide(Red_Souls, Enemy_Group_2, False):
+            damage_sound.play()
             Red_Souls.health -= 1
             Red_Souls.rect.x = 100
             Red_Souls.rect.y = 500
@@ -549,6 +553,7 @@ while running:
 
     if create_boss == 6:
         if sprite.spritecollide(Red_Souls, Enemy_Group_3, False):
+            damage_sound.play()
             Red_Souls.health -= 1
             Red_Souls.rect.x = 100
             Red_Souls.rect.y = 500
