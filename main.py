@@ -23,6 +23,7 @@ size = 50
 win_sound = mixer.Sound('game_sound/win.mp3')
 fireball_sound = mixer.Sound('game_sound/fireball.mp3')
 damage_sound = mixer.Sound('game_sound/damage.mp3')
+death_sound = mixer.Sound('game_sound/death.mp3')
 
 App = display.set_mode([1016, 600])
 display.set_caption('Red Souls')
@@ -116,10 +117,6 @@ class Player(sprite.Sprite):
 
         if self.turn_state == 'turn_right':
             self.player = transform.scale(self.img, [size, size])
-
-    def check_health(self):
-        if self.health <= 0:
-            self.health = 1
             
 class Ability(sprite.Sprite):
     def __init__(self, img, x, y):
@@ -348,7 +345,7 @@ while running:
     if create_boss == 1:
         a = time()
         b = time()
-        boss_1 = Boss('game_img/boss_1.png', 5)
+        boss_1 = Boss('game_img/boss_1.png', 6)
         Boss_group.add(boss_1)
         bullet_1 = Boss_Ability(boss_1.rect.x, boss_1.rect.y, 1, 0)
         bullet_2 = Boss_Ability(boss_1.rect.x, boss_1.rect.y, -1, 0)
@@ -412,7 +409,7 @@ while running:
     if create_boss == 4:
         a = time()
         b = time()
-        boss_2 = Boss('game_img/boss_2.png', 5)
+        boss_2 = Boss('game_img/boss_2.png', 12)
         Boss_group.add(boss_2)
         bullet_1 = Boss_Ability(boss_2.rect.x, boss_2.rect.y, 1, 0)
         bullet_2 = Boss_Ability(boss_2.rect.x, boss_2.rect.y, -1, 0)
@@ -476,7 +473,7 @@ while running:
     if create_boss == 7:
         a = time()
         b = time()
-        boss_3 = Boss('game_img/boss_3.png', 5)
+        boss_3 = Boss('game_img/boss_3.png', 16)
         Boss_group.add(boss_3)
         bullet_1 = Boss_Ability(boss_3.rect.x, boss_3.rect.y, 1, 0)
         bullet_2 = Boss_Ability(boss_3.rect.x, boss_3.rect.y, -1, 0)
@@ -513,10 +510,33 @@ while running:
             create_boss = 9
 
     if create_boss == 9:
+        win_text = Game_Font.render('You Win !', True, RED)
+        App.blit(win_text, [450, 250])
         win_sound.play()
+        Red_Souls.rect.x = 100
+        Red_Souls.rect.y = 500
 
     Red_Souls.move()
     App.blit(Red_Souls.player,Red_Souls.rect)
+
+    if Red_Souls.health == 0:
+        death_text = Game_Font.render('You Died !', True, RED)
+        App.blit(death_text, [450, 250])
+        death_sound.play()
+        Red_Souls.rect.x = 100
+        Red_Souls.rect.y = 500
+
+        for i in Boss_group:
+            i.kill()
+
+        for i in Enemy_Group_1:
+            i.kill()
+
+        for i in Enemy_Group_2:
+            i.kill()
+
+        for i in Enemy_Group_3:
+            i.kill()
 
     if sprite.spritecollide(Red_Souls, Enemy_Group_1, False):
         damage_sound.play()
